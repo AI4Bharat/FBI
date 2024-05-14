@@ -3,7 +3,7 @@ import pandas as pd
 
 from langchain_core.output_parsers import JsonOutputParser
 
-from perturbations.prompts import Facts, Errors, Stitch
+from perturbations.prompts import Facts, Errors, Stitch, DirectError
 
 
 def parse_args():
@@ -22,11 +22,17 @@ def main(args):
         json_parser = JsonOutputParser(pydantic_object=Errors)
     elif args.parser == 'stitch':
         json_parser = JsonOutputParser(pydantic_object=Stitch)
+    elif args.parser == 'direct_error':
+        json_parser = JsonOutputParser(pydantic_object=DirectError)
     else:
         raise ValueError('Invalid parser')
     
     df = pd.read_csv(f"{args.data_dir}/{args.file_name}", sep="\t")
     df['json_parsed'] = df['answer'].apply(lambda x: json_parser.invoke(x))
+
+    new_keys = list(df['json_parsed'].iloc[0].keys())
+    for key in new_keys:
+        df[key] = df['json_parsed'].apply(lambda x: x[key])
 
     df.to_csv(f"{args.data_dir}/{args.file_name.split('.')[0]}-parsed.tsv", sep="\t", index=False)
 

@@ -7,7 +7,7 @@ from openai import OpenAI
 
 from langchain_core.output_parsers import JsonOutputParser
 
-from perturbations.prompts import Facts, Errors, Stitch
+from perturbations.prompts import Facts, Errors, Stitch, DirectError
 
 API_KEY = os.environ['OPENAI_API_KEY']
 client = OpenAI(api_key=API_KEY)
@@ -17,7 +17,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Batch processing')
     parser.add_argument('--data_dir', type=str, default='/Users/sumanth/code/fbi/data', help='Path to data directory')
     parser.add_argument('--subset', type=str, choices=['all', 'reasoning', 'factual', 'instruction-following', 'long-form'], help='Subset of testset')
-    parser.add_argument('--file_name', type=str, default='v0', help='Version of testset')
+    parser.add_argument('--file_name', type=str, default='testset-v0-answers.tsv', help='name of the input file')
     # model arguments
     parser.add_argument('--model', type=str, default='gpt-4-turbo', help='Model to use')
     parser.add_argument('--temperature', type=float, default=0, help='Temperature for sampling')
@@ -34,7 +34,16 @@ def parse_args():
     return args
 
 
-def factual_perturbations(args: argparse.Namespace, testset: pd.DataFrame):
+def factual_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    """Generate factual statements, introduce errors in factual statements, and stitch factual statements with errors.
+    
+    Args:
+        args (argparse.Namespace): Arguments
+        testset (pd.DataFrame): Testset
+
+    Returns:
+        None
+    """
     jsons = []
     for _, row in testset.iterrows():     
 
@@ -109,6 +118,59 @@ def factual_perturbations(args: argparse.Namespace, testset: pd.DataFrame):
             f.write(json.dumps(json_) + '\n')
         
 
+def factual_perturbations_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    """Given the gold answers, directly add errors to the answers.
+    
+    Args:
+        args (argparse.Namespace): Arguments
+        testset (pd.DataFrame): Testset
+    
+    Returns:
+        None
+    """
+    jsons = []
+    for _, row in testset.iterrows():
+        parser = JsonOutputParser(pydantic_object=DirectError)
+        PROMPT = (
+            "Given the following Gold Answer, introduce an error in the answer and provide an explanation of the introduced error.\n"
+            "Make sure the error is not immediately obvious and requires some level of knowledge to identify.\n"
+            "If you are introducing errors in numerical data, ensure that the error is within a reasonable range.\n"
+            "Do not add any highlighted text or any other formatting to the introduced errors.\n"
+            "Only change the sentence in the Gold Answer that corresponds to the error and keep the rest of the Gold Answer the same.\n\n"
+            f"{parser.get_format_instructions()}\n\n"
+            "Gold Answer:\n"
+            f"{row['answer']}\n\n"
+            "Rewrite the full Gold Answer with the introduced error.\n"
+        )
+        dict_ = {
+            'custom_id': row['cdx'],
+            'method': 'POST',
+            'url': '/v1/chat/completions',
+            'body': {
+                'model': f'{args.model}',
+                'messages': [
+                    {
+                        'role': 'system',
+                        'content': 'You are a helpful assistant.'
+                    },
+                    {
+                        'role': 'user',
+                        'content': f'{PROMPT}'
+                    }
+                ],
+                'max_tokens': args.max_tokens,
+                'temperature': args.temperature,
+                'top_p': args.top_p,
+                'frequency_penalty': args.frequency_penalty,
+                'presence_penalty': args.presence_penalty,
+            }
+        }
+        jsons.append(dict_)
+    
+    with open(f'{args.data_dir}/direct-errors2.jsonl', 'w') as f:
+        for json_ in jsons:
+            f.write(json.dumps(json_) + '\n')
+
 
 def main(args):
     testset = pd.read_csv(f'{args.data_dir}/{args.file_name}', sep='\t')
@@ -116,7 +178,8 @@ def main(args):
         testset = testset[testset['ability'] == args.subset]
 
     if args.subset == 'factual':
-        factual_perturbations(args, testset)
+        # factual_perturbations(args, testset)
+        factual_perturbations_v2(args, testset)
     elif args.subset == 'reasoning':
         pass
     elif args.subset == 'instruction-following':
