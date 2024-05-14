@@ -3,7 +3,7 @@ import pandas as pd
 
 from langchain_core.output_parsers import JsonOutputParser
 
-from perturbations.prompts import Facts
+from perturbations.prompts import Facts, Errors, Stitch
 
 
 def parse_args():
@@ -18,6 +18,10 @@ def parse_args():
 def main(args):
     if args.parser == 'facts':
         json_parser = JsonOutputParser(pydantic_object=Facts)
+    elif args.parser == 'errors':
+        json_parser = JsonOutputParser(pydantic_object=Errors)
+    elif args.parser == 'stitch':
+        json_parser = JsonOutputParser(pydantic_object=Stitch)
     else:
         raise ValueError('Invalid parser')
     

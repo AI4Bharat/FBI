@@ -2,11 +2,12 @@ import os
 import json
 import argparse
 import pandas as pd
+from ast import literal_eval
 from openai import OpenAI
 
 from langchain_core.output_parsers import JsonOutputParser
 
-from perturbations.prompts import Facts
+from perturbations.prompts import Facts, Errors, Stitch
 
 API_KEY = os.environ['OPENAI_API_KEY']
 client = OpenAI(api_key=API_KEY)
@@ -16,7 +17,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Batch processing')
     parser.add_argument('--data_dir', type=str, default='/Users/sumanth/code/fbi/data', help='Path to data directory')
     parser.add_argument('--subset', type=str, choices=['all', 'reasoning', 'factual', 'instruction-following', 'long-form'], help='Subset of testset')
-    parser.add_argument('--testset_version', type=str, default='v0', help='Version of testset')
+    parser.add_argument('--file_name', type=str, default='v0', help='Version of testset')
     # model arguments
     parser.add_argument('--model', type=str, default='gpt-4-turbo', help='Model to use')
     parser.add_argument('--temperature', type=float, default=0, help='Temperature for sampling')
@@ -35,26 +36,46 @@ def parse_args():
 
 def factual_perturbations(args: argparse.Namespace, testset: pd.DataFrame):
     jsons = []
-    for _, row in testset.iterrows():
-        answer = row["answer"]
-        
-        # Set up a parser + inject instructions into the prompt template.
-        parser = JsonOutputParser(pydantic_object=Facts)
+    for _, row in testset.iterrows():     
 
         if args.facts:
+            parser = JsonOutputParser(pydantic_object=Facts)
             PROMPT = (
                 "Given the following passage, generate factual statements. Provide a bullet-point list of the key factual statements in the answer.\n\n"
                 f"{parser.get_format_instructions()}\n\n"
-                "Passage:\n\n"
-                f"{answer}\n"
+                "Passage:\n"
+                f"{row['answer']}\n"
             )
             save_name = 'get-facts'
         elif args.errors:
+            parser = JsonOutputParser(pydantic_object=Errors)
+            facts = '\n'.join(literal_eval(row['json_parsed'])['facts'])
+            PROMPT = (
+                "Given the following list of factual statements, introduce an error in one of the statements and provide an explanation of the introduced error.\n"
+                "Make sure the error is subtle and not immediately obvious.\n"
+                "If you are introducing errors in numerical data, ensure that the error is within a reasonable range.\n\n"
+                f"{parser.get_format_instructions()}\n\n"
+                "Factual Statements:\n"
+                f"{facts}"
+            )
             save_name = 'add-errors'
-            pass
         elif args.stitch:
+            parser = JsonOutputParser(pydantic_object=Stitch)
+            errors = '\n'.join(literal_eval(row['error'])['errors'])
+            PROMPT = (
+                "Given the following Question, Gold Answer and a list of factual statements with errors, rewrite the gold answer with the introduced errors.\n"
+                "Only change the sentence in the Gold Answer that corresponds to the error in the factual statements.\n"
+                "Keep the rest of the Gold Answer the same.\n"
+                "DO NOT add any highlighted text or any other formatting to the introduced errors.\n\n"
+                f"{parser.get_format_instructions()}\n\n"
+                "Question:\n"
+                f"{row['question']}\n\n"
+                "Gold Answer:\n"
+                f"{row['answer']}\n\n"
+                "Factual Statements with Errors:\n"
+                f"{errors}"
+            )
             save_name = 'stitch-facts'
-            pass
         else:
             raise ValueError('Invalid perturbation')
 
@@ -90,7 +111,7 @@ def factual_perturbations(args: argparse.Namespace, testset: pd.DataFrame):
 
 
 def main(args):
-    testset = pd.read_csv(f'{args.data_dir}/testset-{args.testset_version}-answers.tsv', sep='\t')
+    testset = pd.read_csv(f'{args.data_dir}/{args.file_name}', sep='\t')
     if args.subset != 'all':
         testset = testset[testset['ability'] == args.subset]
 
