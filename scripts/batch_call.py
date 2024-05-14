@@ -17,13 +17,14 @@ def parse_args():
     parser.add_argument('--input_file_name', type=str, help='File name of batch job')
     parser.add_argument('--output_file_name', type=str, help='File name of batch job')
     parser.add_argument('--job_desc', type=str, help='Description of batch job')
+    parser.add_argument('--data_path', type=str, default='/Users/sumanth/code/fbi/data', help='Path to data directory')
     args = parser.parse_args()
     return args
 
 def main(args):
     if args.create_batch:
         batch_input_file = client.files.create(
-        file=open(f"{args.input_file_name}", "rb"),
+        file=open(f"{args.data_path}/{args.input_file_name}", "rb"),
         purpose="batch"
         )
         batch_input_file_id = batch_input_file.id
@@ -39,7 +40,7 @@ def main(args):
         print(f"Here is the generated file name: {batch_input_file_id}")
     elif args.get_results:
         content = client.files.content(args.job_name)
-        with open(f"{args.output_file_name}", "w") as f:
+        with open(f"{args.data_path}/{args.output_file_name}", "w") as f:
             for line in content:
                 f.write(json.dumps(line) + "\n")
 

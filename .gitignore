@@ -1,2 +1,10 @@
+.DS_Store
 data/*
+outputs/*
 api_key.sh
+*/__pycache__/*
+*/.ipynb_checkpoints/*
+*/.pytest_cache/*
+*/.coverage
+*/.pytest_cache
+*/.ipynb_checkpoints
