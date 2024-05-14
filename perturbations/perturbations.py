@@ -43,7 +43,7 @@ def factual_perturbations(args: argparse.Namespace, testset: pd.DataFrame):
 
         if args.facts:
             PROMPT = (
-                "Given the following passage, generate factual statements.\n\n"
+                "Given the following passage, generate factual statements. Provide a bullet-point list of the key factual statements in the answer.\n\n"
                 f"{parser.get_format_instructions()}\n\n"
                 "Passage:\n\n"
                 f"{answer}\n"
