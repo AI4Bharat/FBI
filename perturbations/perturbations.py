@@ -167,7 +167,7 @@ def factual_perturbations_v2(args: argparse.Namespace, testset: pd.DataFrame) ->
         }
         jsons.append(dict_)
     
-    with open(f'{args.data_dir}/direct-errors2.jsonl', 'w') as f:
+    with open(f'{args.data_dir}/direct-errors-temp{args.temperature}.jsonl', 'w') as f:
         for json_ in jsons:
             f.write(json.dumps(json_) + '\n')
 

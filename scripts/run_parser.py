@@ -1,5 +1,6 @@
 import  argparse
 import pandas as pd
+import pathlib
 
 from langchain_core.output_parsers import JsonOutputParser
 
@@ -28,13 +29,24 @@ def main(args):
         raise ValueError('Invalid parser')
     
     df = pd.read_csv(f"{args.data_dir}/{args.file_name}", sep="\t")
-    df['json_parsed'] = df['answer'].apply(lambda x: json_parser.invoke(x))
+    def run_parser(x):
+        try:
+            return json_parser.invoke(x)
+        except Exception as e:
+            return 'Json parsing error'
+    df['json_parsed'] = df['answer'].apply(lambda x: run_parser(x))
 
+
+    def get_value(x, key):
+        try:
+            return x[key]
+        except:
+            return None
     new_keys = list(df['json_parsed'].iloc[0].keys())
     for key in new_keys:
-        df[key] = df['json_parsed'].apply(lambda x: x[key])
+        df[key] = df['json_parsed'].apply(lambda x: get_value(x, key))
 
-    df.to_csv(f"{args.data_dir}/{args.file_name.split('.')[0]}-parsed.tsv", sep="\t", index=False)
+    df.to_csv(f"{args.data_dir}/{pathlib.Path(args.file_name).stem}-parsed.tsv", sep="\t", index=False)
 
 if __name__ == '__main__':
     args = parse_args()

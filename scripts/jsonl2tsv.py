@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import argparse
+import pathlib
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert jsonl to tsv')
@@ -50,7 +51,7 @@ def main(args):
 
 
     df = pd.DataFrame(jsons)
-    df.to_csv(f"{args.data_dir}/{args.file_name.split('.')[0]}.tsv", sep="\t", index=False)
+    df.to_csv(f"{args.data_dir}/{pathlib.Path(args.file_name).stem}.tsv", sep="\t", index=False)
 
 
 if __name__ == '__main__':
