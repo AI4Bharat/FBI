@@ -2,9 +2,10 @@ import os
 import json
 import argparse
 from openai import OpenAI
+from dotenv import dotenv_values
 
-
-API_KEY = os.environ['OPENAI_API_KEY']
+env_vars = dotenv_values('.env')
+API_KEY = env_vars['OPENAI_API_KEY']
 client = OpenAI(api_key=API_KEY)
 
 
@@ -28,7 +29,7 @@ def main(args):
         )
         batch_input_file_id = batch_input_file.id
 
-        client.batches.create(
+        batch_obj = client.batches.create(
             input_file_id=batch_input_file_id,
             endpoint="/v1/chat/completions",
             completion_window="24h",
@@ -36,6 +37,7 @@ def main(args):
             "description": args.job_desc
             }
         )
+        print(batch_obj)
         print(f"Here is the generated file name: {batch_input_file_id}")
     elif args.get_results:
         content = client.files.content(args.job_name)
