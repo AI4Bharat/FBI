@@ -21,8 +21,7 @@ def parse_args():
     # model arguments
     parser.add_argument('--model', type=str, default='gpt-4-turbo', help='Model to use')
     parser.add_argument('--temperature', type=float, default=0, help='Temperature for sampling')
-    parser.add_argument('--top_p', type=float, default=0, help='Top p for sampling')
-    parser.add_argument('--top_k', type=int, default=0, help='Top k for sampling')
+    parser.add_argument('--top_p', type=float, default=1, help='Top p for sampling')
     parser.add_argument('--max_tokens', type=int, default=2048, help='Max tokens for sampling')
     parser.add_argument('--frequency_penalty', type=float, default=0, help='Frequency penalty for sampling')
     parser.add_argument('--presence_penalty', type=float, default=0, help='Presence penalty for sampling')
