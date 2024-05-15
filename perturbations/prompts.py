@@ -14,3 +14,7 @@ class Stitch(BaseModel):
 class DirectError(BaseModel):
     err_answer: str = Field(description="answer with the introduced error")
     explanation: str = Field(description="explanation of the introduced error")
+
+class MultipleDirectErrors(BaseModel):
+    err_answers: list = Field(description="list of answers with the introduced errors")
+    explanations: list = Field(description="list of explanations of the introduced errors")
