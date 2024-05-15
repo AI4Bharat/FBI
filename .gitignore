@@ -1,3 +1,5 @@
 data/*
 api_key.sh
 *.env
+config.py
+*.pyc

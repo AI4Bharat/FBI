@@ -3,9 +3,11 @@ import json
 import argparse
 from openai import OpenAI
 from dotenv import dotenv_values
+from config import *
 
-env_vars = dotenv_values('.env')
-API_KEY = env_vars['OPENAI_API_KEY']
+# env_vars = dotenv_values('.env')
+# API_KEY = env_vars['OPENAI_API_KEY']
+API_KEY = OPENAI_API_KEY
 client = OpenAI(api_key=API_KEY)
 
 
