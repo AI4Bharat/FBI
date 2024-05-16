@@ -3,16 +3,12 @@ import json
 import argparse
 import pandas as pd
 from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.prompts import PromptTemplate
 from openai import OpenAI
 from prompts.compare_vanilla import *
+from parsers.compare_vanilla import *
 
-
-class Score(BaseModel):
-    justification: str = Field(description="Justification for the verdict")
-    verdict: int = Field(description="final verdict for the comparison")
-    
+ 
 
 
 
