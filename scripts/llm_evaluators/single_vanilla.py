@@ -6,7 +6,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts import PromptTemplate
 from openai import OpenAI
 from prompts.single_vanilla import *
-from parsers.single_vanilla import *
+from parsers import SingleVanillaScore as Score
 
 
 

@@ -6,7 +6,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts import PromptTemplate
 from openai import OpenAI
 from prompts.single_axes_rubrics import *
-from parsers.single_axes_rubrics import *
+from parsers import SingleAxesRubricsScore as Score
 
 
 
