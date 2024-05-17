@@ -85,11 +85,19 @@ def process_instance(data_row, metric):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Axes with Rubrics')
-    parser.add_argument("--file_name", type=str, help="File name of the data")
-    parser.add_argument("--out_file_name", type=str, help="Output jsonl File name")
-    parser.add_argument("--all", action="store_true", default=True, help="Run all metrics")
-    parser.add_argument("--batch_mode", action="store_true", default=True, help="Run evaluation in batch mode")
-    parser.add_argument("--model", type=str, choices=['gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125"], help="Model name")
+    parser.add_argument("--file_name", type=str, 
+                        help="File name of the data")
+    parser.add_argument("--out_file_name", type=str, 
+                        help="Output jsonl File name")
+    parser.add_argument("--batch_mode", action="store_true", default=True,
+                        help="Run evaluation in batch mode")
+    parser.add_argument("--model", type=str, choices=['gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125"], 
+                        help="Model name")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--all", action="store_true",
+                       help="Run all metrics")
+    group.add_argument("--axes", type=str, nargs='+', choices=metrics.keys(),
+                       help="Run specific metrics")
     args = parser.parse_args()
     return args
 
@@ -104,14 +112,20 @@ def main(args):
     if model in ('gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo"):
         if args.batch_mode:
             final_jsonl = []
+            #running all axes
             if args.all:
                 for metric in metrics.keys():
                     for row in df_dict:
                         row_dicts = process_instance(row, metric)
                         final_jsonl.extend(row_dicts)
                 write_jsonl(final_jsonl, args.out_file_name)
+            #running only the selected axes
             else:
-                print("1Still pending")
+                for metric in args.axes:
+                    for row in df_dict:
+                        row_dicts = process_instance(row, metric)
+                        final_jsonl.extend(row_dicts)
+                write_jsonl(final_jsonl, args.out_file_name)
         else:
             print("2Still pending")
     else:
@@ -121,3 +135,12 @@ def main(args):
 if __name__ == '__main__':
     args = parse_args()
     main(args)
+    
+    
+"""
+python scripts/llm_evaluators/single_axes_rubrics.py 
+--file_name data/axes_rubrics_data.tsv 
+--out_file_name data/axes_rubrics_results.jsonl 
+--model gpt-4o 
+--all
+"""
