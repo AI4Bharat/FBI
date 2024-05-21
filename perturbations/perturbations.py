@@ -29,6 +29,38 @@ def parse_args():
     return args
 
 
+def create_jsonl(cdx: str, model_name: str, prompt: str, max_tokens: int, temperature: float, top_p: float, frequency_penalty: float, presence_penalty: float) -> dict:
+    return {
+        'custom_id': cdx,
+        'method': 'POST',
+        'url': '/v1/chat/completions',
+        'body': {
+            'model': f'{model_name}',
+            'messages': [
+                {
+                    'role': 'system',
+                    'content': 'You are a helpful assistant.'
+                },
+                {
+                    'role': 'user',
+                    'content': f'{prompt}'
+                }
+            ],
+            'max_tokens': max_tokens,
+            'temperature': temperature,
+            'top_p': top_p,
+            'frequency_penalty': frequency_penalty,
+            'presence_penalty': presence_penalty,
+        }
+    }
+
+
+def dump_jsonl(jsons: list, file_name: str) -> None:
+    with open(file_name, 'w') as f:
+        for json_ in jsons:
+            f.write(json.dumps(json_) + '\n')
+
+
 def factual_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     """Generate factual statements, introduce errors in factual statements, and stitch factual statements with errors.
     
@@ -83,34 +115,11 @@ def factual_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> No
         else:
             raise ValueError('Invalid perturbation')
 
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
 
-    with open(f'{args.data_dir}/{save_name}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/{save_name}.jsonl')
+    return
         
 
 def factual_perturbations_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
@@ -137,34 +146,11 @@ def factual_perturbations_v2(args: argparse.Namespace, testset: pd.DataFrame) ->
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
         )
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
     
-    with open(f'{args.data_dir}/direct-errors-temp{args.temperature}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/direct-errors-temp{args.temperature}.jsonl')
+    return
 
 
 def factual_perturbations_v3(args: argparse.Namespace, testset: pd.DataFrame) -> None:
@@ -191,34 +177,11 @@ def factual_perturbations_v3(args: argparse.Namespace, testset: pd.DataFrame) ->
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced errors.\n"
         )
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
     
-    with open(f'{args.data_dir}/multiple-direct-errors-temp{args.temperature}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/multiple-direct-errors-temp{args.temperature}.jsonl')
+    return
 
 
 def contextual_fact_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> None:
@@ -250,34 +213,10 @@ def contextual_fact_perturbations(args: argparse.Namespace, testset: pd.DataFram
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
         )
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
     
-    with open(f'{args.data_dir}/contextual-errors-temp{args.temperature}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/contextual-errors-temp{args.temperature}.jsonl')
     return
 
 
@@ -307,34 +246,10 @@ def number_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> Non
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
         )
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
 
-    with open(f'{args.data_dir}/number-errors-temp{args.temperature}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/number-errors-temp{args.temperature}.jsonl')
     return
 
 
@@ -364,34 +279,10 @@ def entity_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> Non
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
         )
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
 
-    with open(f'{args.data_dir}/entity-errors-temp{args.temperature}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/entity-errors-temp{args.temperature}.jsonl')
     return
 
 
@@ -421,34 +312,10 @@ def add_incorrect_fact(args: argparse.Namespace, testset: pd.DataFrame) -> None:
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
         )
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
     
-    with open(f'{args.data_dir}/incorrect-fact-temp{args.temperature}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/incorrect-fact-temp{args.temperature}.jsonl')
     return
 
 
@@ -478,34 +345,10 @@ def opposite_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> N
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
         )
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
     
-    with open(f'{args.data_dir}/opposite-fact-temp{args.temperature}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/opposite-fact-temp{args.temperature}.jsonl')
     return
 
 
@@ -535,34 +378,10 @@ def remove_fact(args: argparse.Namespace, testset: pd.DataFrame) -> None:
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
         )
-        dict_ = {
-            'custom_id': row['cdx'],
-            'method': 'POST',
-            'url': '/v1/chat/completions',
-            'body': {
-                'model': f'{args.model}',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant.'
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'{PROMPT}'
-                    }
-                ],
-                'max_tokens': args.max_tokens,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'frequency_penalty': args.frequency_penalty,
-                'presence_penalty': args.presence_penalty,
-            }
-        }
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
     
-    with open(f'{args.data_dir}/remove-fact-temp{args.temperature}.jsonl', 'w') as f:
-        for json_ in jsons:
-            f.write(json.dumps(json_) + '\n')
+    dump_jsonl(jsons, f'{args.data_dir}/remove-fact-temp{args.temperature}.jsonl')
     return
 
 
