@@ -78,7 +78,7 @@ def parse_args():
     parser.add_argument("--file_name", type=str, help="File name of the data")
     parser.add_argument("--out_file_name", type=str, help="Output jsonl File name")
     parser.add_argument("--batch_mode", action="store_true", default=True, help="Run evaluation in batch mode")
-    parser.add_argument("--model", type=str, choices=['gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125"], help="Model name")
+    parser.add_argument("--model", type=str, choices=['gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125", "llama3-70b"], help="Model name")
     args = parser.parse_args()
     return args
 
@@ -89,7 +89,7 @@ def main(args):
     df_dict = df.to_dict('records')
     model = args.model
 
-    if model in ('gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125"):
+    if model in ('gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125", "llama3-70b"):
         if args.batch_mode:
             final_jsonl = []
             for row in df_dict:

@@ -1,10 +1,12 @@
 import os
 import json
 import argparse
+from turtle import back
 import backoff
 import logging
 from openai import OpenAI, RateLimitError
 from joblib import Parallel, delayed
+import openai
 from config import *
 
 API_KEY = OPENAI_API_KEY
@@ -49,6 +51,7 @@ def format_result_dict(res, custom_id):
 
 def call_openai(data_dict):
     openai_client = OpenAI(api_key = API_KEY)
+    
     model = data_dict['body']['model']
     max_tokens = data_dict['body']['max_tokens']
     temperature = data_dict['body']['temperature']
@@ -72,12 +75,45 @@ def call_openai(data_dict):
         return {'error': str(e), 'custom_id': custom_id}
         
         
+def call_llama3(data_dict):
+    openai_client = OpenAI(
+        base_url = LLAMA3_BASE_URL,
+        api_key = LLAMA3_API_KEY
+    )
+    
+    model = data_dict['body']['model']
+    if model == 'llama3-70b':
+        model = "meta-llama/Meta-Llama-3-70B-Instruct"
+    max_tokens = data_dict['body']['max_tokens']
+    temperature = data_dict['body']['temperature']
+    custom_id = data_dict['custom_id']
+    messages = data_dict['body']['messages']
+    
+    try:
+        res = openai_client.chat.completions.create(
+            model = model, 
+            messages = messages,
+            max_tokens = max_tokens, 
+            temperature = temperature
+        )
+        return_res = format_result_dict(res.model_dump(), custom_id)
+        return return_res
+    except RateLimitError as e:
+        raise
+    except Exception as e:
+        print(e)
+        logger.error(f"Error processing request for custom_id={custom_id}: {str(e)}")
+        return {'error': str(e), 'custom_id': custom_id}
+    
     
 
 @backoff.on_exception(backoff.expo, RateLimitError)
 def backoff_openai_call(data_dict):
     return call_openai(data_dict)
     
+@backoff.on_exception(backoff.expo, RateLimitError)
+def backoff_llama3_call(data_dict):
+    return call_llama3(data_dict)
         
     
     
@@ -97,8 +133,11 @@ def main(args):
     if data[0]['body']['model'] in ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo-0125', 'gpt-4o']:
         results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_openai_call)(data_dict) for data_dict in data)
         write_jsonl(args.output_file_name, results)
+    elif data[0]['body']['model'] in ['llama3-70b']:
+        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_llama3_call)(data_dict) for data_dict in data)
+        write_jsonl(args.output_file_name, results)
     else:
-        print("still pending")
+        print("Still pending")
 
 if __name__ == '__main__':
     args = parse_args()
