@@ -51,7 +51,7 @@ def create_dict(id, question, answer, metric,):
         "method": "POST",
         "url": "/v1/chat/completions",
         "body": {
-            "model": "gpt-4o", 
+            "model": model, 
             "messages": [
                 {
                     "role": "system", 
@@ -109,7 +109,7 @@ def main(args):
     df_dict = df.to_dict('records')
     model = args.model
 
-    if model in ('gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo"):
+    if model in ('gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125"):
         if args.batch_mode:
             final_jsonl = []
             #running all axes

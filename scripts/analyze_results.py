@@ -68,9 +68,12 @@ def main(args):
         results, changed, changed_ids, unprocessed_ids, errors = analyze_single_vanilla_batch_result(data)
         print(f"Total number of results: {len(data)/2}")
         print(f"Total number of changed results: {changed}")
+        print(f"Total number of unchanged results: {len(data)/2 - changed}")
         print(f"Changed ids: {changed_ids}")
         print(f"Unprocessed ids: {unprocessed_ids}")
         print(f"Errors: {errors}")
+    else:
+        print("Still pending")
         
         
 if __name__ == "__main__":
