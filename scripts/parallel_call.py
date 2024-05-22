@@ -1,18 +1,22 @@
 import os
 import json
 import argparse
+from pyexpat import model
 import backoff
 import logging
+import google.generativeai as genai
 from openai import OpenAI
 from openai import RateLimitError as OpenAIRateLimitError
 from joblib import Parallel, delayed
 from anthropic import Anthropic
 from anthropic import RateLimitError as AnthropicRateLimitError
+from google.generativeai import GenerativeModel
+from google.api_core.exceptions import ResourceExhausted as GeminiRateLimitError
 from config import *
 
 
 
-API_KEY = OPENAI_API_KEY
+
 
 
 logging.basicConfig(level=logging.INFO)
@@ -48,6 +52,17 @@ def format_anthropic_messages(messages):
             }
             formatted_messages.append(formatted_message)
     return system_prompt, formatted_messages
+
+def format_gemini_messages(messages):
+    formatted_messages = []
+    for message in messages:
+        if message['role'] == 'system':
+            system_prompt = message['content']
+            continue
+        else:
+            prompt = message['content']
+            
+    return system_prompt, prompt
 
 def format_openai_result_dict(res, custom_id):
     result_dict = {
@@ -102,9 +117,41 @@ def format_anthropic_result_dict(res, custom_id):
         }
     return result_dict
 
+def format_gemini_result_dict(res, custom_id, model):
+    result_dict = {
+        'id' : f"parallel_req_Gemini_None",
+            "custom_id": custom_id,
+            "response": {
+                "status_code": 200,
+                "request_id": None,
+                "body":{
+                    "id": None,
+                    "object": "chat.completion",
+                    "created": None,
+                    "model": model,
+                    "choices": [{
+                        'finish_reason': res.candidates[0].finish_reason.value,
+                        'index': 0,
+                        'logprobs': None,
+                        'message': {
+                            'content': res.candidates[0].content.parts[0].text,
+                            'role': res.candidates[0].content.role,
+                            'function_call': None,
+                            'tools_call': None,
+                            'name': None
+                        }
+                    }],
+                    "usage": None,
+                    "system_fingerprint": None
+                }
+            },
+            "error": None
+        }
+    return result_dict
+
 
 def call_openai(data_dict):
-    openai_client = OpenAI(api_key = API_KEY)
+    openai_client = OpenAI(api_key = OPENAI_API_KEY)
     
     model = data_dict['body']['model']
     max_tokens = data_dict['body']['max_tokens']
@@ -189,6 +236,64 @@ def call_claude(data_dict):
         print(e)
         logger.error(f"Error processing request for custom_id={custom_id}: {str(e)}")
         return {'error': str(e), 'custom_id': custom_id}
+    
+def call_gemini(data_dict):
+
+    genai.configure(api_key = GEMINI_API_KEY)
+    
+    safety_settings = [
+        {
+            "category": "HARM_CATEGORY_HARASSMENT",
+            "threshold": "BLOCK_NONE",
+        },
+        {
+            "category": "HARM_CATEGORY_HATE_SPEECH",
+            "threshold": "BLOCK_NONE",
+        },
+        {
+            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            "threshold": "BLOCK_NONE",
+        },
+        {
+            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+            "threshold": "BLOCK_NONE",
+        },
+    ]
+    
+    model = data_dict['body']['model']
+    if model == 'gemini-1.5-flash':
+        model = 'gemini-1.5-flash-latest'
+    elif model == 'gemini-1.5-pro':
+        model = 'gemini-1.5-pro-latest'
+    max_tokens = data_dict['body']['max_tokens']
+    temperature = data_dict['body']['temperature']
+    custom_id = data_dict['custom_id']
+    
+    generation_config = {
+        "temperature": temperature,
+        "max_output_tokens": max_tokens,
+        "response_mime_type": "text/plain",
+    }
+    system_prompt, messages = format_gemini_messages(data_dict['body']['messages'])
+    client = GenerativeModel(
+        model_name = model,
+        safety_settings = safety_settings,
+        generation_config = generation_config,
+        system_instruction = system_prompt
+    )
+    try:
+        res = client.generate_content(messages)
+        return_res = format_gemini_result_dict(res, custom_id, model)
+        return return_res
+    except GeminiRateLimitError as e:
+        raise
+    except Exception as e:
+        print(type(e))
+        print(e)
+        logger.error(f"Error processing request for custom_id={custom_id}: {str(e)}")
+        return {'error': str(e), 'custom_id': custom_id}
+    
+
 
 
 @backoff.on_exception(backoff.expo, OpenAIRateLimitError)
@@ -203,6 +308,9 @@ def backoff_llama3_call(data_dict):
 def backoff_claude_call(data_dict):
     return call_claude(data_dict)
 
+@backoff.on_exception(backoff.expo, GeminiRateLimitError)
+def backoff_gemini_call(data_dict):
+    return call_gemini(data_dict)
         
     
     
@@ -227,6 +335,9 @@ def main(args):
         write_jsonl(args.output_file_name, results)
     elif data[0]['body']['model'] in ['claude3-opus']:
         results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_claude_call)(data_dict) for data_dict in data)
+        write_jsonl(args.output_file_name, results)
+    elif data[0]['body']['model'] in ['gemini-1.5-flash', 'gemini-1.5-pro']:
+        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_gemini_call)(data_dict) for data_dict in data)
         write_jsonl(args.output_file_name, results)
     else:
         print("Still pending")

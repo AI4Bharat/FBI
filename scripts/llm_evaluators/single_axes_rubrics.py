@@ -91,7 +91,7 @@ def parse_args():
                         help="Output jsonl File name")
     parser.add_argument("--batch_mode", action="store_true", default=True,
                         help="Run evaluation in batch mode")
-    parser.add_argument("--model", type=str, choices=['gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125", "llama3-70b", "claude3-opus"], 
+    parser.add_argument("--model", type=str, choices=['gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125", "llama3-70b", "claude3-opus", 'gemini-1.5-flash', 'gemini-1.5-pro'], 
                         help="Model name")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--all", action="store_true",
@@ -109,7 +109,7 @@ def main(args):
     df_dict = df.to_dict('records')
     model = args.model
 
-    if model in ('gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125", "llama3-70b", "claude3-opus"):
+    if model in ('gpt-4o', "gpt-4-turbo", "gpt-3.5-turbo-0125", "llama3-70b", "claude3-opus", 'gemini-1.5-flash', 'gemini-1.5-pro'):
         if args.batch_mode:
             final_jsonl = []
             #running all axes
