@@ -12,4 +12,5 @@
 # python -m scripts.run_parser --file_name comprehensiveness-errors-temp1.0-answers.tsv --parser direct_error
 # python -m scripts.run_parser --file_name comprehensiveness-errors-temp1.0-answers2.tsv --parser direct_error
 # python -m scripts.run_parser --file_name superficial-errors-temp1.0-answers.tsv --parser direct_error
-python -m scripts.run_parser --file_name superficial-errors-temp1.0-answers2.tsv --parser direct_error
+# python -m scripts.run_parser --file_name superficial-errors-temp1.0-answers2.tsv --parser direct_error
+python -m scripts.run_parser --file_name calculation-errors-temp1.0-answers.tsv --parser direct_error

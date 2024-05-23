@@ -4,7 +4,7 @@ import pathlib
 
 from langchain_core.output_parsers import JsonOutputParser
 
-from perturbations.prompts import Facts, Errors, Stitch, DirectError
+from perturbations.parsers import Facts, Errors, Stitch, DirectError
 
 
 def parse_args():
@@ -33,6 +33,7 @@ def main(args):
         try:
             return json_parser.invoke(x)
         except Exception as e:
+            print(e)
             return 'Json parsing error'
     df['json_parsed'] = df['answer'].apply(lambda x: run_parser(x))
 
@@ -42,6 +43,7 @@ def main(args):
             return x[key]
         except:
             return None
+    print(df['json_parsed'].iloc[0])
     new_keys = list(df['json_parsed'].iloc[0].keys())
     for key in new_keys:
         df[key] = df['json_parsed'].apply(lambda x: get_value(x, key))

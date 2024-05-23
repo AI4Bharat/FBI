@@ -22,6 +22,14 @@ from perturbations.prompts.long_form import (
     comprehensiveness_perturbations,
     superficial_perturbations
 )
+from perturbations.prompts.reasoning import (
+    calculation_errors,
+    final_answer_perturbations,
+    incorrect_units,
+    operation_order,
+    wrong_formula,
+    copying_numbers_errors
+)
 
 
 def parse_args():
@@ -62,7 +70,12 @@ def main(args):
         opposite_perturbations(args, testset)
         remove_fact(args, testset)
     elif args.subset == 'reasoning':
-        pass
+        calculation_errors(args, testset)
+        final_answer_perturbations(args, testset)
+        incorrect_units(args, testset)
+        operation_order(args, testset)
+        wrong_formula(args, testset)
+        copying_numbers_errors(args, testset)
     elif args.subset == 'instruction-following':
         pass
     elif args.subset == 'long-form':

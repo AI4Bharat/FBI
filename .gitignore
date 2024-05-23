@@ -8,3 +8,4 @@ api_key.sh
 */.coverage
 */.pytest_cache
 */.ipynb_checkpoints
+perturbations/prompts/__pycache__/*.pyc
