@@ -112,6 +112,42 @@ def chronological_perturbations(args: argparse.Namespace, testset: pd.DataFrame)
     dump_jsonl(args, jsons, f'{args.data_dir}/chronological-errors-temp{args.temperature}.jsonl')
     return
 
+def chronological_perturbations_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    """Given a gold answer, introduce chronological errors.
+    
+    Args:
+        args (argparse.Namespace): Arguments
+        testset (pd.DataFrame): Testset
+        
+    Returns:
+        None
+    """
+    jsons = []
+    for _, row in testset.iterrows():
+        parser = JsonOutputParser(pydantic_object=DirectError)
+        PROMPT = (
+            "Given the following Gold Answer, introduce a sequencing error in the answer.\n"
+            "Here are a list of possible sequencing errors you can introduce:\n"
+            "1. Shuffling Steps: Rearrange the steps of a process so they are out of order.\n"
+            "2. Reverse Causality: Swap the cause and effect statements.\n"
+            "3. Misordered Conditional Statements: Incorrectly order 'if-then' statements.\n"
+            "4. Misplaced Modifiers: Place modifiers in such a way that they mislead or change the meaning.\n"
+            "5. Parallel Structure Error: Mix items that should be in parallel structure.\n"
+            "6. Chronological Inconsistency: Mix up the sequence of historical or time-based events.\n"
+            "7. Stepwise Process Error: Present steps in an order that is impossible to follow.\n"
+            "8. Spatial Disorientation: Misplace spatial instructions or descriptions.\n\n"
+            "Pick one of the errors from the above list, or any other similar sequencing error relevant to the given gold answer, and introduce it in the answer.\n"
+            "Provide an explanation of the introduced error.\n"
+            f"{parser.get_format_instructions()}\n\n"
+            "Gold Answer:\n"
+            f"{row['answer']}\n\n"
+            "Rewrite the full Gold Answer with the introduced error.\n"
+        )
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
+        jsons.append(dict_)
+    
+    dump_jsonl(args, jsons, f'{args.data_dir}/seq-errors-temp{args.temperature}.jsonl')
+    return
 
 def consistency_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     """Given a gold answer, introduce inconsistencies in the answer.
