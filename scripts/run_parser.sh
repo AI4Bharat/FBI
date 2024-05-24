@@ -14,8 +14,9 @@
 # python -m scripts.run_parser --file_name superficial-errors-temp1.0-answers.tsv --parser direct_error
 # python -m scripts.run_parser --file_name superficial-errors-temp1.0-answers2.tsv --parser direct_error
 # python -m scripts.run_parser --file_name calculation-errors-temp1.0-answers.tsv --parser direct_error
-# python -m scripts.run_parser --file_name omit-step-temp1.0-answers.tsv --parser direct_error
+# python -m scripts.run_parser --file_name incorrect-sequence-temp1.0-answers2.tsv --parser direct_error
+python -m scripts.run_parser --file_name omit-step-temp1.0-answers2.tsv --parser direct_error
 # python -m scripts.run_parser --file_name incomplete-execution-temp1.0-answers.tsv --parser direct_error
 # python -m scripts.run_parser --file_name misread-instructions-temp1.0-answers.tsv --parser direct_error
 # python -m scripts.run_parser --file_name assumptions-temp1.0-answers.tsv --parser direct_error
-python -m scripts.run_parser --file_name do-more-temp1.0-answers.tsv --parser direct_error
+# python -m scripts.run_parser --file_name do-more-temp1.0-answers.tsv --parser direct_error

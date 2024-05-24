@@ -8,8 +8,8 @@ from perturbations.parsers import DirectError
 
 
 def incorrect_sequence(args: argparse.Namespace, testset: pd.DataFrame) -> None:
-    # TODO: can be used in long form perturbations too
-    """Given a instruction-following question and it's corresponding answer, change the answer to follow the wrong sequence of steps in the instruction.
+    # TODO: this is still changing the steps in the answer, not the question. similar to coherence_perturbations
+    """Given a instruction-following question and it's corresponding answer, rewrite the answer in the wrong sequence of execution.
     
     Args:
         args (argparse.Namespace): Command line arguments
@@ -22,14 +22,19 @@ def incorrect_sequence(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     for _, row in testset.iterrows():
         parser = JsonOutputParser(pydantic_object=DirectError)
         PROMPT = (
-            "Given a instruction-following question and it's corresponding answer, change the answer to follow the given instructions in the wrong sequence.\n"
-            "Only change the sequence of the steps and introduce an error.\n"
+            "Given a question and its corresponding answer, alter the sequence of steps in the question to introduce errors in the answer.\n"
+            "Here are some things to keep in mind when generating the answer:\n"
+            "1. Identify the logical steps in the given question.\n"
+            "2. Change the order of these steps to create a new sequence.\n"
+            "3. Rewrite the provided answer, reflecting the errors that result from this new sequence.\n"
+            "4. Ensure that the introduced errors are a direct consequence of the changed order of execution.\n"
+            "5. Maintain the original context and terminology used in the question and answer.\n\n"
             f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
-            "Rewrite the full Gold Answer with the introduced error.\n"
+            "Rewrite the full Gold Answer with errors introduced by changing the order of execution of the question.\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
@@ -52,8 +57,13 @@ def omit_step(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     for _, row in testset.iterrows():
         parser = JsonOutputParser(pydantic_object=DirectError)
         PROMPT = (
-            "Given a instruction-following question and it's corresponding answer, omit a step in the answer.\n"
-            "Only omit one step and introduce an error.\n"
+            "Given an instruction-following question and its corresponding answer, omit one step in the answer to introduce an error.\n"
+            "Here are the instructions to follow:\n"
+            "1. Review the provided question and answer carefully.\n"
+            "2. Identify a single step in the answer.\n"
+            "3. Omit this step to introduce an error.\n"
+            "4. Ensure that the error directly affects the accuracy or completeness of the answer.\n"
+            "5. Preserve the original context and terminology used in the question and answer.\n\n"
             f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
@@ -82,8 +92,13 @@ def incomplete_execution(args: argparse.Namespace, testset: pd.DataFrame) -> Non
     for _, row in testset.iterrows():
         parser = JsonOutputParser(pydantic_object=DirectError)
         PROMPT = (
-            "Given an instruction-following question and its corresponding answer, ensure that the instructions are only partially executed.\n"
-            "Only execute a part of the instructions and introduce an error.\n"
+            "Given an instruction-following question and its corresponding answer, ensure that the instructions are only partially executed to introduce an error.\n"
+            "Here are the instructions to follow:\n"
+            "1. Carefully review the provided question and answer.\n"
+            "2. Identify the steps in the answer that correspond to the instructions in the question.\n"
+            "3. Partially execute one or more instructions.\n"
+            "4. Ensure that the omission introduces a clear error.\n"
+            "5. Maintain the original context and terminology of the question and answer.\n\n"
             f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
