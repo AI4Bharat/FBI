@@ -1,6 +1,5 @@
 import argparse
 import pandas as pd
-from ast import literal_eval
 
 from langchain_core.output_parsers import JsonOutputParser
 
