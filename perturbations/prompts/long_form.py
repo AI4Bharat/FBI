@@ -112,6 +112,42 @@ def chronological_perturbations(args: argparse.Namespace, testset: pd.DataFrame)
     dump_jsonl(args, jsons, f'{args.data_dir}/chronological-errors-temp{args.temperature}.jsonl')
     return
 
+def chronological_perturbations_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    """Given a gold answer, introduce chronological errors.
+    
+    Args:
+        args (argparse.Namespace): Arguments
+        testset (pd.DataFrame): Testset
+        
+    Returns:
+        None
+    """
+    jsons = []
+    for _, row in testset.iterrows():
+        parser = JsonOutputParser(pydantic_object=DirectError)
+        PROMPT = (
+            "Given the following Gold Answer, introduce a sequencing error in the answer.\n"
+            "Here are a list of possible sequencing errors you can introduce:\n"
+            "1. Shuffling Steps: Rearrange the steps of a process so they are out of order.\n"
+            "2. Reverse Causality: Swap the cause and effect statements.\n"
+            "3. Misordered Conditional Statements: Incorrectly order 'if-then' statements.\n"
+            "4. Misplaced Modifiers: Place modifiers in such a way that they mislead or change the meaning.\n"
+            "5. Parallel Structure Error: Mix items that should be in parallel structure.\n"
+            "6. Chronological Inconsistency: Mix up the sequence of historical or time-based events.\n"
+            "7. Stepwise Process Error: Present steps in an order that is impossible to follow.\n"
+            "8. Spatial Disorientation: Misplace spatial instructions or descriptions.\n\n"
+            "Pick one of the errors from the above list, or any other similar sequencing error relevant to the given gold answer, and introduce it in the answer.\n"
+            "Provide an explanation of the introduced error.\n"
+            f"{parser.get_format_instructions()}\n\n"
+            "Gold Answer:\n"
+            f"{row['answer']}\n\n"
+            "Rewrite the full Gold Answer with the introduced error.\n"
+        )
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
+        jsons.append(dict_)
+    
+    dump_jsonl(args, jsons, f'{args.data_dir}/seq-errors-temp{args.temperature}.jsonl')
+    return
 
 def consistency_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     """Given a gold answer, introduce inconsistencies in the answer.
@@ -130,6 +166,54 @@ def consistency_perturbations(args: argparse.Namespace, testset: pd.DataFrame) -
         PROMPT = (
             "Given the following Gold Answer, introduce inconsistencies in the answer.\n"
             "Introduce logical inconsistencies to create errors in the answer.\n"
+            "Provide an explanation of the introduced error.\n"
+            f"{parser.get_format_instructions()}\n\n"
+            "Gold Answer:\n"
+            f"{row['answer']}\n\n"
+            "Rewrite the full Gold Answer with the introduced error.\n"
+        )
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
+        jsons.append(dict_)
+
+    dump_jsonl(args, jsons, f'{args.data_dir}/consistency-errors-temp{args.temperature}.jsonl')
+    return
+
+def consistency_perturbations_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    """Given a gold answer, introduce inconsistencies in the answer.
+    
+    Args:
+        args (argparse.Namespace): Arguments
+        testset (pd.DataFrame): Testset
+    
+    Returns:
+        None
+    """
+    jsons = []
+    for _, row in testset.iterrows():
+        parser = JsonOutputParser(pydantic_object=DirectError)
+        # removed: conflicting information, contradictory facts, and
+        PROMPT = (
+            "Given the following Gold Answer, introduce a consistency error in the answer.\n"
+            "Here are a list of possible consistency errors you can introduce:\n"
+            "1. Tone Inconsistency: Start with a formal or polite tone and end with an informal or rude tone.\n"
+            "2. Contradictory Statements: Make a statement at the beginning and then contradict it later.\n"
+            "   Example: 'Climate change is a critical issue we must address. Climate change is a hoax.'\n"
+            "3. Terminology Inconsistency: Use different terms for the same concept or entity within the same answer.\n"
+            "   Example: 'The project manager will lead the team. The team leader will assign tasks.'\n"
+            "4. Perspective Inconsistency: Switch from one perspective to another (e.g., first person to third person).\n"
+            "5. Inconsistent Level of Detail: Provide detailed information at some parts and be overly vague at others.\n"
+            "   Example: 'To solve the equation, first, isolate the variable. Then do the math.'\n"
+            "6. Inconsistent Naming: Refer to the same person or thing by different names.\n"
+            "   Example: 'Dr. Smith presented the findings. Later, John elaborated on the results.'\n"
+            "7. Inconsistent Recommendations: Give a recommendation and later suggest the opposite.\n"
+            "   Example: 'You should invest in stocks. Avoid investing in the stock market.'\n"
+            "8. Inconsistent Stance: Take a position on an issue and then take the opposite stance.\n"
+            "   Example: 'It's important to conserve water. Excessive water use is not a big issue.'\n"
+            "9. Inconsistent Use of Units: Switch between different units of measurement.\n"
+            "10. Inconsistent Logic: Present logical arguments that do not align or follow a coherent line of reasoning.\n"
+            "    Example: 'Exercise is essential for health. People who exercise are not necessarily healthy.'\n\n"
+            "Pick one of the errors that suit best from the above list and introduce it in the answer.\n"
+            "And make this error consistent throughout the answer.\n\n"
             "Provide an explanation of the introduced error.\n"
             f"{parser.get_format_instructions()}\n\n"
             "Gold Answer:\n"
