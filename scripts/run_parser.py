@@ -43,7 +43,6 @@ def main(args):
             return x[key]
         except:
             return None
-    print(df['json_parsed'].iloc[0])
     new_keys = list(df['json_parsed'].iloc[0].keys())
     for key in new_keys:
         df[key] = df['json_parsed'].apply(lambda x: get_value(x, key))

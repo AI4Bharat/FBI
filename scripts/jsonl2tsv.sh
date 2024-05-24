@@ -19,4 +19,10 @@
 # python scripts/jsonl2tsv.py --file_name incorrect-units-temp1.0-answers.jsonl
 # python scripts/jsonl2tsv.py --file_name operation-order-temp1.0-answers.jsonl
 # python scripts/jsonl2tsv.py --file_name wrong-formula-temp1.0-answers.jsonl
-python scripts/jsonl2tsv.py --file_name copying-numbers-errors-temp1.0-answers.jsonl
+# python scripts/jsonl2tsv.py --file_name copying-numbers-errors-temp1.0-answers.jsonl
+# python scripts/jsonl2tsv.py --file_name incorrect-sequence-temp1.0-answers.jsonl
+# python scripts/jsonl2tsv.py --file_name omit-step-temp1.0-answers.jsonl
+# python scripts/jsonl2tsv.py --file_name incomplete-execution-temp1.0-answers.jsonl
+# python scripts/jsonl2tsv.py --file_name misread-instructions-temp1.0-answers.jsonl
+# python scripts/jsonl2tsv.py --file_name assumptions-temp1.0-answers.jsonl
+python scripts/jsonl2tsv.py --file_name do-more-temp1.0-answers.jsonl

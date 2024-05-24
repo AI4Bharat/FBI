@@ -30,6 +30,14 @@ from perturbations.prompts.reasoning import (
     wrong_formula,
     copying_numbers_errors
 )
+from perturbations.prompts.instruction_following import (
+    incorrect_sequence,
+    omit_step,
+    incomplete_execution,
+    misread_instructions,
+    assumptions,
+    do_more
+)
 
 
 def parse_args():
@@ -77,7 +85,12 @@ def main(args):
         wrong_formula(args, testset)
         copying_numbers_errors(args, testset)
     elif args.subset == 'instruction-following':
-        pass
+        incorrect_sequence(args, testset)
+        omit_step(args, testset)
+        incomplete_execution(args, testset)
+        misread_instructions(args, testset)
+        assumptions(args, testset)
+        do_more(args, testset)
     elif args.subset == 'long-form':
         grammar_perturbations(args, testset)
         spelling_perturbations(args, testset)
