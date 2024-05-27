@@ -239,3 +239,43 @@ def do_more(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     
     dump_jsonl(args, jsons, f'{args.data_dir}/do-more-temp{args.temperature}.jsonl')
     return
+
+def do_more_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    # TODO: not doing more than what is asked
+    """Given an instruction-following question, generate a new answer that does more than what is asked in the question.
+    
+    Args:
+        args (argparse.Namespace): Command line arguments
+        testset (pd.DataFrame): Testset
+        
+    Returns:
+        None
+    """
+    jsons = []
+    for _, row in testset.iterrows():
+        parser = JsonOutputParser(pydantic_object=DirectError)
+        PROMPT = (
+            "I am developing a system to evaluate the quality of answers and need to test its ability to detect subtle errors in responses. "
+            "For this, I have prepared a list of questions along with their ideal answers (gold answers). "
+            "To challenge my evaluators, I want to introduce errors in the responses by adding unrequested information that is not directly relevant or requested by the question.\n"
+            "Given a question and a gold answer, your task is to modify the gold answer by intentionally inserting additional, unnecessary details or information. "
+            "The added information should make the response less concise and potentially misleading without being overtly incorrect on factual grounds.\n"
+            "For example:\n"
+            "1. If the question asks for the causes of the French Revolution, you can add irrelevant details about the architecture of that period.\n"
+            "2. If the question asks to describe the process of photosynthesis, you can include an unnecessary explanation of plant anatomy unrelated to the process.\n"
+            "3. If the question asks for a brief history of a company, include extraneous details about the industry that are not directly relevant.\n"
+            "4. If the question asks for a solution to a math problem, add a discussion on the importance of learning mathematics.\n"
+            "The modified answer should still contain the correct information from the gold answer but with the addition of unrelated or unrequested information.\n\n"
+            "Question:\n"
+            f"{row['question']}\n\n"
+            "Gold Answer:\n"
+            f"{row['answer']}\n\n"
+            "Rewrite the full Gold Answer with the introduced error and provide an explanation for the error made.\n"
+            f"{parser.get_format_instructions()}\n\n"
+        )
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
+        jsons.append(dict_)
+    
+    dump_jsonl(args, jsons, f'{args.data_dir}/do-more-temp{args.temperature}.jsonl')
+    return
+
