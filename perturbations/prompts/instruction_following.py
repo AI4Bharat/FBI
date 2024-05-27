@@ -112,6 +112,44 @@ def incomplete_execution(args: argparse.Namespace, testset: pd.DataFrame) -> Non
     dump_jsonl(args, jsons, f'{args.data_dir}/incomplete-execution-temp{args.temperature}.jsonl')
     return
 
+def incomplete_execution_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    # TODO: remove the answer and regenerate it
+    """Given an instruction-following question and its corresponding answer, ensure that the instructions are only partially executed.
+    
+    Args:
+        args (argparse.Namespace): Command line arguments
+        testset (pd.DataFrame): Testset
+    
+    Returns:
+        None
+    """
+    jsons = []
+    for _, row in testset.iterrows():
+        parser = JsonOutputParser(pydantic_object=DirectError)
+        PROMPT = (
+            "I want to create a few questions to test how good my evaluations system is. For this, I have collected some questions along with their gold answers."
+            "For testing my evaluators, I want to make some subtle errors in the responses that are not easily detectable by the evaluators.\n"
+            "Given a question and a solution (gold answer), I want you to help me in creating such errored answers based on the 'Omission of Requested Details' perturbation. Your task is to perturb the gold answer such that deliberately omits specific details or steps that were explicitly requested in the original question. Ensure that the perturbed response, while being same as gold answer, lacks the completeness requested, making it subtly incorrect in the context of the question's requirements.\n"
+            "For example:\n"
+            "1. If the question asks for 3 steps, you can give only 2 steps in the answer.\n"
+            "2. If the question asks for a specific detail, you can omit that detail in the answer.\n"
+            "3. If the question asks for list of 5 items, you can give only 4 items in the answer.\n"
+            "4. If the question asks for a specific order, you can give the items in a different order in the answer.\n"
+            "The perturbed answer must be same as gold answer but with the added perturbation (similar to the ones mentioned above) to make the answer incorrect with respect to the question.\n\n"
+            "You must only remove something that is specifically asked in the question. Do not add any new information or remove some information from the answer which is not explicitly asked in the question.\n\n"
+            "Question:\n"
+            f"{row['question']}\n\n"
+            "Gold Answer:\n"
+            f"{row['answer']}\n\n"
+            "Rewrite the Gold Answer with the introduced error and give an explanation for the error made.\n"
+            f"{parser.get_format_instructions()}\n\n"
+        )
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
+        jsons.append(dict_)
+
+    dump_jsonl(args, jsons, f'{args.data_dir}/incomplete-execution-temp{args.temperature}.jsonl')
+    return
+
 def misread_instructions(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     # TODO: should probably remove the answer and ask the model to generate the answer
     """Given an instruction-following question and its corresponding answer, misread the instructions such as misinterpreting words or numbers.
