@@ -9,6 +9,7 @@ from perturbations.parsers import DirectError
 
 def incorrect_sequence(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     # TODO: this is still changing the steps in the answer, not the question. similar to coherence_perturbations
+    # TODO: May need to get more custom questions for this.
     """Given a instruction-following question and it's corresponding answer, rewrite the answer in the wrong sequence of execution.
     
     Args:
@@ -135,6 +136,8 @@ def incomplete_execution_v2(args: argparse.Namespace, testset: pd.DataFrame) -> 
             "2. If the question asks for a specific detail, you can omit that detail in the answer.\n"
             "3. If the question asks for list of 5 items, you can give only 4 items in the answer.\n"
             "4. If the question asks for a specific order, you can give the items in a different order in the answer.\n"
+            "5. If the question asks for a specific style, you give the answer without that style.\n"
+            "etc...\n\n"
             "The perturbed answer must be same as gold answer but with the added perturbation (similar to the ones mentioned above) to make the answer incorrect with respect to the question.\n\n"
             "You must only remove something that is specifically asked in the question. Do not add any new information or remove some information from the answer which is not explicitly asked in the question.\n\n"
             "Question:\n"
@@ -279,3 +282,44 @@ def do_more_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     dump_jsonl(args, jsons, f'{args.data_dir}/do-more-temp{args.temperature}.jsonl')
     return
 
+
+def ignore_format_constraints(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    # TODO: not doing more than what is asked
+    """Given an instruction-following question, generate a new answer that does not follow the format constraints.
+    
+    Args:
+        args (argparse.Namespace): Command line arguments
+        testset (pd.DataFrame): Testset
+        
+    Returns:
+        None
+    """
+    jsons = []
+    for _, row in testset.iterrows():
+        parser = JsonOutputParser(pydantic_object=DirectError)
+        PROMPT = (
+            "I am developing a series of tests to evaluate the effectiveness of an evaluation system for machine-generated text. "
+            "To do this, I have compiled several questions and their corresponding correct answers (gold answers). "
+            "As part of the test, I want to introduce subtle errors in the responses that are difficult for evaluators to detect.\n"
+            "Given a question and a solution (gold answer), I need your help to create such errored answers based on the 'Ignoring Specific Constraints or Formats' perturbation. "
+            "Your task is to perturb the gold answer such that it ignores any formatting, structural, or specific content constraints explicitly requested in the original question. "
+            "While the content should remain accurate, the format of the response should not adhere to the specified constraints, rendering it subtly incorrect in the context of the question's requirements.\n"
+            "For example:\n"
+            "1. If the question asks for a response in bullet points, provide it in a continuous paragraph.\n"
+            "2. If the question specifies a word count of 200 words, provide significantly more or less.\n"
+            "3. If the question asks for specific examples to be included, omit these examples.\n"
+            "4. If the question asks for a response in numbered steps, provide the steps in a narrative format without numbering.\n"
+            "etc...\n\n"
+            "The perturbed answer must retain the same informational content as the gold answer but should ignore the formatting or structural constraints specified in the question.\n\n"
+            "Question:\n"
+            f"{row['question']}\n\n"
+            "Gold Answer:\n"
+            f"{row['answer']}\n\n"
+            "Rewrite the full Gold Answer ignoring the specific constraints or formats, and provide an explanation for the modifications made.\n"
+            f"{parser.get_format_instructions()}\n\n"
+        )
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
+        jsons.append(dict_)
+    
+    dump_jsonl(args, jsons, f'{args.data_dir}/ignore-format-temp{args.temperature}.jsonl')
+    return
