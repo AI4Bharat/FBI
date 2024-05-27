@@ -105,6 +105,43 @@ def final_answer_perturbations_v2(args: argparse.Namespace, testset: pd.DataFram
     dump_jsonl(args, jsons, f'{args.data_dir}/final-answer-errors-temp{args.temperature}.jsonl')
     return
 
+def final_answer_perturbations_v3(args: argparse.Namespace, testset: pd.DataFrame) -> None:
+    """Given a reasoning question and it's corresponding answer, generate final answer errors.
+    
+    Args:
+        args (argparse.Namespace): Command line arguments
+        testset (pd.DataFrame): Testset
+    
+    Returns:
+        None
+    """
+    jsons = []
+    for _, row in testset.iterrows():
+        parser = JsonOutputParser(pydantic_object=DirectError)
+        # TODO: condesing the answer and just returning the final answer -> fix this
+        PROMPT = (
+            "I want to create a few questions to test how good my evaluations system is. For this, I have collected some reasoning questions along with their correct solutions i.e., gold answers."
+            "For testing my evaluators, I want to make some errors in the final answer while the intermediate steps in the solution remain same to see if it is being detected by the system or not.\n"
+            "Follow these instructions carefully to introduce the error:\n"
+            "1. Ensure all intermediate steps in the solution are correct and unchanged.\n"
+            "2. Only change the final calculation step and introduce an error in the final answer.\n"
+            "3. The final answer should be incorrect, but the logical flow and reasoning steps leading up to it must remain accurate and consistent.\n"
+            "4. Maintain the structure and clarity of the original solution, making sure the error is subtle and isolated to the final answer.\n"
+            "5. The error can be due to a simple arithmetic mistake, a wrong conclusion drawn from the correct steps, or a minor oversight in the last calculation.\n\n"
+            "Given the question and the gold answer (i.e., solution), return the 'entire' solution with the introduced error in the final answer.\n"
+            "Question:\n"
+            f"{row['question']}\n\n"
+            "Gold Answer:\n"
+            f"{row['answer']}\n\n"
+            "Rewrite the full Gold Answer with the introduced error and also give an explanation about the error introduced.\n"
+            f"{parser.get_format_instructions()}\n\n"
+        )
+        dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
+        jsons.append(dict_)
+
+    dump_jsonl(args, jsons, f'{args.data_dir}/final-answer-errors-temp{args.temperature}.jsonl')
+    return
+
 def incorrect_units(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     """Given the following answer for a reasoning question, change the units of measurement.
     

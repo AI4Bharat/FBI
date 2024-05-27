@@ -12,7 +12,7 @@ class Stitch(BaseModel):
     answer: str = Field(description="gold answer with the introduced errors")
 
 class DirectError(BaseModel):
-    err_answer: str = Field(description="answer with the introduced error")
+    err_answer: str = Field(description="entire answer with the introduced error")
     explanation: str = Field(description="explanation of the introduced error")
 
 class MultipleDirectErrors(BaseModel):
