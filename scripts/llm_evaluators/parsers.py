@@ -12,6 +12,10 @@ class SingleVanillaCOTScore(BaseModel):
     justification: str = Field(description="Justification for the score")
     score: int = Field(description="Score for the Answer")
     
+class SingleRubricsScore(BaseModel):
+    justification: str = Field(description="Justification for the score")
+    score: int = Field(description="Score for the Answer")
+    
 class SingleAxesRubricsScore(BaseModel):
     justification: str = Field(description="Justification for the score")
     score: int = Field(description="Score for the metric")

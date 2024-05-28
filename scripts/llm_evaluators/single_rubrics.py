@@ -5,15 +5,15 @@ import pandas as pd
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts import PromptTemplate
 from openai import OpenAI
-from prompts.single_vanilla_cot import *
-from parsers import SingleVanillaCOTScore as Score
+from prompts.single_rubrics import *
+from parsers import SingleRubricsScore as Score
 
 
 
 
 prompt = PromptTemplate(
         template=general_schema,
-        input_variables=["question", "correct_answer", "format_instruction"],
+        input_variables=["prompt", "response", "format_instruction", "rubrics"],
     )
 
 parser = JsonOutputParser(pydantic_object=Score)
@@ -30,8 +30,9 @@ def create_dict(id, question, answer):
     #processing the original answer first
     orig_prompt = prompt.invoke(
         {
-            "question": question, 
-            "correct_answer": answer, 
+            "prompt": question, 
+            "response": answer, 
+            "rubrics": rubrics,
             "format_instruction": parser.get_format_instructions()
         }
     )
@@ -61,11 +62,11 @@ def process_instance(data_row):
     perturbed_answer = data_row['perturbed_gpt4']
     
     #processing the original answer
-    orig_id = f"{id}~vanilla_cot~orig"
+    orig_id = f"{id}~rubrics~orig"
     orig_dict = create_dict(orig_id, prompt, original_answer)
     
     #processing the pertubed answer
-    perturb_id = f"{id}~vanilla_cot~pert"
+    perturb_id = f"{id}~rubrics~pert"
     pert_dict = create_dict(perturb_id, prompt, perturbed_answer)
     
     return [orig_dict, pert_dict] 
