@@ -47,7 +47,7 @@ def custom_json_parser(data):
     
 
 def parse_and_get_score(data):
-    parser = JsonOutputParser(pydantic_object=SingleVanillaScore)
+    parser = JsonOutputParser(pydantic_object=SingleVanillaCOTScore)
     #try by default using the langchain parser
     try:
         return parser.invoke(data)['score']
@@ -58,7 +58,7 @@ def parse_and_get_score(data):
         raise e
         
 
-def analyze_single_vanilla_batch_result(data):
+def analyze_single_vanilla_cot_batch_result(data):
     
     #processing the batch results
     results = dict()
@@ -105,13 +105,13 @@ def analyze_compare_vanilla_batch_result(data):
 def parse_args():
     parser = argparse.ArgumentParser(description='Analyze LLM results')
     parser.add_argument("--file_name", type=str, help="File name of the data")
-    parser.add_argument("--type", type=str, choices=['single_vanilla', 'single_axes_rubrics', 'compare_vanilla'], help="Type of the data")
+    parser.add_argument("--type", type=str, choices=['single_vanilla', 'single_vanilla_cot', 'single_axes_rubrics', 'compare_vanilla'], help="Type of the data")
     return parser.parse_args()
 
 def main(args):
-    if args.type == 'single_vanilla':
+    if args.type == 'single_vanilla_cot':
         data = read_jsonl(args.file_name)
-        results, changed, changed_ids, unprocessed_ids, errors = analyze_single_vanilla_batch_result(data)
+        results, changed, changed_ids, unprocessed_ids, errors = analyze_single_vanilla_cot_batch_result(data)
         print(f"Total number of results: {len(data)/2}")
         print(f"Total number of changed results: {changed}")
         print(f"Total number of unchanged results: {len(data)/2 - errors/2 - changed}")

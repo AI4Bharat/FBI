@@ -5,16 +5,15 @@ import pandas as pd
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts import PromptTemplate
 from openai import OpenAI
-from prompts.compare_vanilla_cot import *
-from parsers import CompareVanillaCOTScore as Score
+from prompts.single_vanilla_cot import *
+from parsers import SingleVanillaCOTScore as Score
 
- 
 
 
 
 prompt = PromptTemplate(
         template=general_schema,
-        input_variables=["question", "correct_answer", "perturbed_answer", "format_instruction"],
+        input_variables=["question", "correct_answer", "format_instruction"],
     )
 
 parser = JsonOutputParser(pydantic_object=Score)
@@ -26,14 +25,13 @@ def write_jsonl(data, filename):
         for item in data:
             f.write(json.dumps(item) + '\n')
             
-def create_dict(id, question, answer_a, answer_b):
+def create_dict(id, question, answer):
     
     #processing the original answer first
     orig_prompt = prompt.invoke(
         {
             "question": question, 
-            "correct_answer": answer_a, 
-            "perturbed_answer": answer_b,
+            "correct_answer": answer, 
             "format_instruction": parser.get_format_instructions()
         }
     )
@@ -63,10 +61,14 @@ def process_instance(data_row):
     perturbed_answer = data_row['perturbed_gpt4']
     
     #processing the original answer
-    orig_id = f"{id}~compare_vanilla~orig_perturb"
-    orig_dict = create_dict(orig_id, prompt, original_answer, perturbed_answer)
+    orig_id = f"{id}~vanilla~orig"
+    orig_dict = create_dict(orig_id, prompt, original_answer)
     
-    return [orig_dict] 
+    #processing the pertubed answer
+    perturb_id = f"{id}~vanilla~pert"
+    pert_dict = create_dict(perturb_id, prompt, perturbed_answer)
+    
+    return [orig_dict, pert_dict] 
     
 
     
