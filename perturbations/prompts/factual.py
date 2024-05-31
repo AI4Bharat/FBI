@@ -316,7 +316,7 @@ def remove_fact(args: argparse.Namespace, testset: pd.DataFrame) -> None:
         parser = JsonOutputParser(pydantic_object=DirectError)
         PROMPT = (
             "Given the following Gold Answer, remove a fact from the answer.\n"
-            "Examples of these would include removing a fact that is relevant and important to the context of the answer.\n"
+            "Examples of these would include removing a fact that is extremely relevant and important to the context of the answer.\n"
             "Make sure that the introduced error is not immediately obvious and requires some level of knowledge to identify.\n"
             "Please make sure that the introduced error is consistent throughout the answer.\n"
             "Provide an explanation of the introduced error.\n"
