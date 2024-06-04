@@ -6,6 +6,17 @@ from langchain_core.output_parsers import JsonOutputParser
 from perturbations.utils import create_jsonl, dump_jsonl
 from perturbations.parsers import DirectError
 
+format_instructions = """Always give the answer "only" in the below format:
+Explanation: <give the explanation here>
+############
+Perturbed Answer: <give the perturbed answer here>
+
+
+The perturbed answer should not have any explanation or information about the type of error introduced. It should just be same as the gold answer but with a subtly added error.
+Always generate the explanation of the perturbation first and then give the perturbed answer. 
+Maintain the formatting of the gold answer (including all the brackets and paratheses) in the perturbed answer. Give the complete gold answer with the introduced perturbation.
+Make sure you follow the above format for the response."""
+
 
 def calculation_errors(args: argparse.Namespace, testset: pd.DataFrame) -> None:
     """Given a reasoning question and it's corresponding answer, generate calculation errors.
@@ -23,12 +34,13 @@ def calculation_errors(args: argparse.Namespace, testset: pd.DataFrame) -> None:
         PROMPT = (
             "Given a reasoning question and it's corresponding answer, generate calculation errors.\n"
             "Make sure the final answer is unchanged, only introduce erros in the intermediate calculation steps.\n"
-            f"{parser.get_format_instructions()}\n\n"
+            # f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
+            f"{format_instructions}\n\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
@@ -92,12 +104,13 @@ def final_answer_perturbations_v2(args: argparse.Namespace, testset: pd.DataFram
             "4. Maintain the structure and clarity of the original solution, making sure the error is subtle and isolated to the final answer.\n"
             "5. The error can be due to a simple arithmetic mistake, a wrong conclusion drawn from the correct steps, or a minor oversight in the last calculation.\n\n"
             "Ensure that you give the entire gold answer with the introduced error along with the explanation for the error.\n"
-            f"{parser.get_format_instructions()}\n\n"
+            # f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
+            f"{format_instructions}\n\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
@@ -134,7 +147,8 @@ def final_answer_perturbations_v3(args: argparse.Namespace, testset: pd.DataFram
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error and also give an explanation about the error introduced.\n"
-            f"{parser.get_format_instructions()}\n\n"
+            # f"{parser.get_format_instructions()}\n\n"
+            f"{format_instructions}\n\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
@@ -158,12 +172,13 @@ def incorrect_units(args: argparse.Namespace, testset: pd.DataFrame) -> None:
         PROMPT = (
             "Given the following answer for a reasoning question, change the units of measurement.\n"
             "Make sure the final answer is unchanged, only introduce erros in the units of measurement.\n"
-            f"{parser.get_format_instructions()}\n\n"
+            # f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
+            f"{format_instructions}\n\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
@@ -188,12 +203,13 @@ def operation_order(args: argparse.Namespace, testset: pd.DataFrame) -> None:
         # TODO: this is also changing the formulas, I think this is good only
         PROMPT = (
             "Given the following answer for a reasoning question, change the order of operations by NOT following PEMDAS or BODMAS.\n"
-            f"{parser.get_format_instructions()}\n\n"
+            # f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
+            f"{format_instructions}\n\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
@@ -218,12 +234,13 @@ def wrong_formula(args: argparse.Namespace, testset: pd.DataFrame) -> None:
         PROMPT = (
             "Based on the given question and its corresponding answer, apply an incorrect formula instead of the expected one to solve the reasoning question.\n"
             "Make sure the final answer is unchanged, only introduce erros in the formula.\n"
-            f"{parser.get_format_instructions()}\n\n"
+            # f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
+            f"{format_instructions}\n\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
@@ -254,7 +271,8 @@ def wrong_formula_v2(args: argparse.Namespace, testset: pd.DataFrame) -> None:
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
-            f"{parser.get_format_instructions()}\n\n"
+            # f"{parser.get_format_instructions()}\n\n"
+            f"{format_instructions}\n\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)
@@ -286,12 +304,13 @@ def copying_numbers_errors(args: argparse.Namespace, testset: pd.DataFrame) -> N
             "5. Writing Incorrect Decimals\n"
             "6. Writing Incorrect Fractions\n"
             "Pick one or more of the above errors and introduce them in the answer.\n"
-            f"{parser.get_format_instructions()}\n\n"
+            # f"{parser.get_format_instructions()}\n\n"
             "Question:\n"
             f"{row['question']}\n\n"
             "Gold Answer:\n"
             f"{row['answer']}\n\n"
             "Rewrite the full Gold Answer with the introduced error.\n"
+            f"{format_instructions}\n\n"
         )
         dict_ = create_jsonl(row['cdx'], args.model, PROMPT, args.max_tokens, args.temperature, args.top_p, args.frequency_penalty, args.presence_penalty)
         jsons.append(dict_)

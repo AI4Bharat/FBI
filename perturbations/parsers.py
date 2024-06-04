@@ -121,3 +121,57 @@ class CustomJsonOutputParser:
                 raise Exception("JSON validation failed") from e
 
         raise Exception("No valid JSON could be extracted")
+    
+    
+class CustomReasoningParser:
+    """
+    A custom output parser that extracts the outermost JSON object from a string,
+    attempts to parse it, and validates it against a specified Pydantic model.
+
+    Attributes:
+        pydantic_model (BaseModel): The Pydantic model class used for validating the parsed JSON.
+
+    Methods:
+        find_outermost_json(data): Extracts the outermost JSON object from a string.
+        invoke(data): Parses and validates the JSON object against the Pydantic model.
+    """
+
+    def __init__(self, pydantic_model):
+        """
+        Initializes the parser with a Pydantic model for JSON validation.
+
+        Args:
+            pydantic_model (BaseModel): A subclass of pydantic.BaseModel that defines the expected JSON schema.
+
+        Raises:
+            ValueError: If the provided model is not a subclass of pydantic.BaseModel.
+        """
+        if not issubclass(pydantic_model, BaseModel):
+            raise ValueError("pydantic_model must be a subclass of pydantic.BaseModel")
+        self.pydantic_model = pydantic_model
+
+    def create_json_dict(self, data):
+        if "############" in data:
+            explanation = data.split("############")[0].replace("Explanation:", "").strip()
+            err_answer = data.split("############")[1].replace("Perturbed Answer:", "").strip()
+        else:
+            explanation = data.split("Explanation:")[1].split("Perturbed Answer:")[0].strip()
+            err_answer = data.split("Perturbed Answer:")[1].strip()
+        return {'explanation': explanation, 'err_answer': err_answer}
+
+    def invoke(self, data):
+        """
+        Parses the extracted JSON string and validates it against the Pydantic model.
+
+        Args:
+            data (str): The string from which to extract and validate JSON.
+
+        Returns:
+            BaseModel: An instance of the Pydantic model populated with validated data.
+
+        Raises:
+            Exception: If the JSON string is invalid or if validation against the Pydantic model fails.
+        """
+        json_dict = self.create_json_dict(data)
+        return json_dict
+       
