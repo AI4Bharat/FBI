@@ -8,8 +8,7 @@ independently solve the user question step-by-step first. Then compare both assi
 answers with your answer. Identify and correct any mistakes. Avoid any position biases and
 ensure that the order in which the responses were presented does not influence your
 decision. Do not allow the length of the responses to influence your evaluation. Do not
-favor certain names of the assistants. Be as objective as possible. After providing your
-explanation, output your final verdict by strictly following this format: "[[A]]" if
+favor certain names of the assistants. Be as objective as possible. Output only your final verdict by strictly following this format: "[[A]]" if
 assistant A is better, "[[B]]" if assistant B is better, "[[C]]" for a tie, and "[[D]]" if both the answers are unacceptable.
 [User Question]
 {question}

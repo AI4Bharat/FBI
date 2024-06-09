@@ -5,8 +5,10 @@ import pandas as pd
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts import PromptTemplate
 from openai import OpenAI
-from prompts.compare_vanilla import *
-from parsers import CompareVanillaScore as Score
+from prompts.compare_vanilla_cot import *
+from parsers import CompareVanillaCOTScore as Score
+
+ 
 
 
 
