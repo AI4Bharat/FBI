@@ -12,6 +12,10 @@ class CompareRulesScore(BaseModel):
     justification: str = Field(description="Justification for the verdict")
     verdict: int = Field(description="final verdict for the comparison")
     
+class CompareAxesScore(BaseModel):
+    justification: str = Field(description="Justification for the verdict")
+    verdict: int = Field(description="final verdict for the comparison")
+    
 class SingleVanillaScore(BaseModel):
     score: int = Field(description="Score for the Answer")
     
