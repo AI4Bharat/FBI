@@ -8,6 +8,10 @@ class CompareVanillaCOTScore(BaseModel):
 class CompareVanillaScore(BaseModel):
     verdict: int = Field(description="final verdict for the comparison")
     
+class CompareRulesScore(BaseModel):
+    justification: str = Field(description="Justification for the verdict")
+    verdict: int = Field(description="final verdict for the comparison")
+    
 class SingleVanillaScore(BaseModel):
     score: int = Field(description="Score for the Answer")
     
