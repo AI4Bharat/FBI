@@ -63,7 +63,7 @@ def process_instance(data_row):
     perturbed_answer = data_row['perturbed_gpt4']
     
     #processing the original answer
-    orig_id = f"{id}~compare_vanilla~orig_perturb"
+    orig_id = f"{id}~compare_vanilla_cot~orig_perturb"
     orig_dict = create_dict(orig_id, prompt, original_answer, perturbed_answer)
     
     return [orig_dict] 
