@@ -12,7 +12,7 @@ from parsers import CompareVanillaScore as Score
 
 prompt = PromptTemplate(
         template=general_schema,
-        input_variables=["question", "correct_answer", "perturbed_answer", "format_instruction"],
+        input_variables=["question", "answer_a", "answer_b", "format_instruction"],
     )
 
 parser = JsonOutputParser(pydantic_object=Score)
@@ -30,8 +30,8 @@ def create_dict(id, question, answer_a, answer_b):
     orig_prompt = prompt.invoke(
         {
             "question": question, 
-            "correct_answer": answer_a, 
-            "perturbed_answer": answer_b,
+            "answer_a": answer_a, 
+            "answer_b": answer_b,
             "format_instruction": parser.get_format_instructions()
         }
     )
