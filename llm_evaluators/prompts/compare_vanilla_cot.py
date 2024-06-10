@@ -14,9 +14,9 @@ assistant A is better, "[[B]]" if assistant B is better, "[[C]]" for a tie, and 
 [User Question]
 {question}
 [The Start of Assistant A's Answer]
-{correct_answer}
+{answer_a}
 [The End of Assistant A's Answer]
 [The Start of Assistant B's Answer]
-{perturbed_answer}
+{answer_b}
 [The End of Assistant B's Answer]\n\n
 {format_instruction}\n\n"""
