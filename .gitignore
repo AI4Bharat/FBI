@@ -12,3 +12,7 @@ config.py
 */.ipynb_checkpoints
 firebase_key.json
 perturbations/prompts/__pycache__/*.pyc
+batch_call/*
+justifications/*
+output_objects/*
+scripts/tracking.json

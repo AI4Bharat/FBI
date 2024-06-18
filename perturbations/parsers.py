@@ -25,6 +25,10 @@ class DirectError(BaseModel):
 class MultipleDirectErrors(BaseModel):
     err_answers: list = Field(description="list of answers with the introduced errors")
     explanations: list = Field(description="list of explanations of the introduced errors")
+
+class JustificationEvalParser(BaseModel):
+    explanation: str = Field(description="explanation of the introduced error")
+    score: bool = Field(description="boolean to indentify if the explanation has identified the error")
     
 
 class CustomJsonOutputParser:
@@ -175,3 +179,11 @@ class CustomReasoningParser:
         json_dict = self.create_json_dict(data)
         return json_dict
        
+
+class CompareVanillaCOTScore(BaseModel):
+    justification: str = Field(description="Justification for the verdict")
+    verdict: int = Field(description="final verdict for the comparison")
+    
+class SingleVanillaCOTScore(BaseModel):
+    justification: str = Field(description="Justification for the score")
+    score: int = Field(description="Score for the Answer")

@@ -29,7 +29,7 @@ def main(args):
         )
         batch_input_file_id = batch_input_file.id
 
-        client.batches.create(
+        req = client.batches.create(
             input_file_id=batch_input_file_id,
             endpoint="/v1/chat/completions",
             completion_window="24h",
@@ -37,7 +37,24 @@ def main(args):
             "description": args.job_desc
             }
         )
-        print(f"Here is the generated file name: {batch_input_file_id}")
+
+        if not os.path.exists('tracking.json'):
+            with open('tracking.json', 'w') as f:
+                json.dump([], f)
+        
+        with open('tracking.json') as f:
+            data = json.load(f)
+            data.append(
+                {
+                    "batch_id": req.id,
+                    "file_name": args.input_file_name,
+                    "path": '/'.join(args.data_path.split('/')[-2:])
+                }
+            )
+        
+        with open('tracking.json', 'w') as f:
+            json.dump(data, f, indent=4)
+
     elif args.get_results:
         content = client.files.content(args.job_name)
         with open(f"{args.data_path}/{args.output_file_name}", "w") as f:
