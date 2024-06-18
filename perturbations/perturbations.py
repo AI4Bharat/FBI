@@ -2,9 +2,6 @@ import argparse
 import pandas as pd
 
 from perturbations.prompts.factual import (
-    factual_perturbations,
-    factual_perturbations_v2,
-    factual_perturbations_v3,
     contextual_fact_perturbations,
     number_perturbations,
     entity_perturbations,
@@ -51,11 +48,6 @@ def parse_args():
     parser.add_argument('--top_p', type=float, default=1, help='Top p for sampling')
     parser.add_argument('--max_tokens', type=int, default=2048, help='Max tokens for sampling')
     parser.add_argument('--frequency_penalty', type=float, default=0, help='Frequency penalty for sampling')
-    parser.add_argument('--presence_penalty', type=float, default=0, help='Presence penalty for sampling')
-    # perturbation arguments
-    parser.add_argument('--facts', action='store_true', help='Generate factual statements')
-    parser.add_argument('--errors', action='store_true', help='Generate factual statements with errors')
-    parser.add_argument('--stitch', action='store_true', help='Stitch factual statements with errors')
     # debug
     parser.add_argument('--debug', action='store_true', help='Debug mode')
     args = parser.parse_args()
@@ -68,9 +60,6 @@ def main(args):
         testset = testset[testset['ability'] == args.subset]
 
     if args.subset == 'factual':
-        factual_perturbations(args, testset)
-        factual_perturbations_v2(args, testset)
-        factual_perturbations_v3(args, testset)
         contextual_fact_perturbations(args, testset)
         number_perturbations(args, testset)
         entity_perturbations(args, testset)
