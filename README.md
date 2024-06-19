@@ -5,7 +5,7 @@
 We present FBI, our novel meta-evaluation framework designed to assess the robustness of evaluator LLMs across diverse tasks and evaluation strategies. Please refer to our [paper]() and [blog]() for more details.
 
 <p align="center" width="100%">
-      <img src="imgs/fbi.jpg" alt="We present FBI, our novel meta-evaluation framework designed to assess the robustness of evaluator LLMs across diverse tasks and evaluation strategies." style="width: 75%; min-width: 200px; display: block; margin: auto;">
+      <img src="assets/imgs/FBI.jpg" alt="We present FBI, our novel meta-evaluation framework designed to assess the robustness of evaluator LLMs across diverse tasks and evaluation strategies." style="width: 75%; min-width: 200px; display: block; margin: auto;">
 </p>
 
 ## Setup
@@ -24,6 +24,8 @@ export OPENAI_API_KEY=[ADD_YOUR_OPENAI_API_KEY]
 ## Generate Perturbations
 
 To generate perturbations, specify the desired task ability, model, and other parameters. This will create a `FILENAME.jsonl`, that can be used to create a [Batch API](https://platform.openai.com/docs/guides/batch) call to get the model outputs.
+
+Sample perturbations across all the 22 categories are available at [here](assets/sample_perturbations/)!!!
 
 Use the following command to generate the jsonl:
 ```bash
