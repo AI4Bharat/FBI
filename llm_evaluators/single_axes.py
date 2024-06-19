@@ -15,10 +15,9 @@ from parsers import SingleAxesScore as Score
 
 metrics = {
     'halu': hallucination,
-    'ling_acep': linguistic_acceptability,
-    'prob_cont': problematic_content,
     'task_qual': task_quality,
-    'cont_qual': content_quality
+    'cont_qual': content_quality,
+    'reas_acc': reasoning_accuracy
     }
 
 prompt = PromptTemplate(
