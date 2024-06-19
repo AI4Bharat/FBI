@@ -4,6 +4,7 @@ import argparse
 from pyexpat import model
 import backoff
 import logging
+from tqdm import tqdm
 import google.generativeai as genai
 from openai import OpenAI
 from openai import RateLimitError as OpenAIRateLimitError
@@ -12,10 +13,14 @@ from anthropic import Anthropic
 from anthropic import RateLimitError as AnthropicRateLimitError
 from google.generativeai import GenerativeModel
 from google.api_core.exceptions import ResourceExhausted as GeminiRateLimitError
-from config import *
 
 
 
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+LLAMA3_API_KEY = os.getenv('LLAMA3_API_KEY')
+LLAMA3_BASE_URL = os.getenv('LLAMA3_BASE_URL')
+CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 
 
@@ -304,7 +309,7 @@ def backoff_openai_call(data_dict):
 def backoff_llama3_call(data_dict):
     return call_llama3(data_dict)
 
-@backoff.on_exception(backoff.expo, AnthropicRateLimitError)
+@backoff.on_exception(backoff.expo, Exception)
 def backoff_claude_call(data_dict):
     return call_claude(data_dict)
 
@@ -328,16 +333,16 @@ def main(args):
     
     #check the model type
     if data[0]['body']['model'] in ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo-0125', 'gpt-4o']:
-        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_openai_call)(data_dict) for data_dict in data)
+        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_openai_call)(data_dict) for data_dict in tqdm(data))
         write_jsonl(args.output_file_name, results)
     elif data[0]['body']['model'] in ['llama3-70b']:
-        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_llama3_call)(data_dict) for data_dict in data)
+        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_llama3_call)(data_dict) for data_dict in tqdm(data))
         write_jsonl(args.output_file_name, results)
     elif data[0]['body']['model'] in ['claude3-opus']:
-        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_claude_call)(data_dict) for data_dict in data)
+        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_claude_call)(data_dict) for data_dict in tqdm(data))
         write_jsonl(args.output_file_name, results)
     elif data[0]['body']['model'] in ['gemini-1.5-flash', 'gemini-1.5-pro']:
-        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_gemini_call)(data_dict) for data_dict in data)
+        results = Parallel(n_jobs = args.n_jobs)(delayed(backoff_gemini_call)(data_dict) for data_dict in tqdm(data))
         write_jsonl(args.output_file_name, results)
     else:
         print("Still pending")
