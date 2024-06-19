@@ -10,15 +10,12 @@ from parsers import SingleAxesRubricsScore as Score
 
 
 
-#defining prompt templates here
-
 
 metrics = {
     'halu': hallucination,
-    'ling_acep': linguistic_acceptability,
-    'prob_cont': problematic_content,
     'task_qual': task_quality,
-    'cont_qual': content_quality
+    'cont_qual': content_quality,
+    'reas_acc': reasoning_accuracy
     }
 
 prompt = PromptTemplate(
@@ -136,11 +133,3 @@ if __name__ == '__main__':
     args = parse_args()
     main(args)
     
-    
-"""
-python scripts/llm_evaluators/single_axes_rubrics.py 
---file_name data/axes_rubrics_data.tsv 
---out_file_name data/axes_rubrics_results.jsonl 
---model gpt-4o 
---all
-"""
