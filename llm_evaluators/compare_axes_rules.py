@@ -5,8 +5,8 @@ import pandas as pd
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts import PromptTemplate
 from openai import OpenAI
-from prompts.compare_axes import *
-from parsers import CompareAxesScore as Score
+from prompts.compare_axes_rules import *
+from parsers import CompareAxesRulesScore as Score
 
 
 
@@ -71,13 +71,13 @@ def process_instance(data_row, p_mode, metric):
         prompt = data_row['question']
         original_answer = data_row['perturbed_gpt4']
         perturbed_answer = data_row['og']
-        orig_id = f"{id}~compare_axes_cot~{metric}~perturb_orig"
+        orig_id = f"{id}~compare_axes_rules_cot~{metric}~perturb_orig"
     else:        
         id = data_row['cdx']
         prompt = data_row['question']
         original_answer = data_row['og']
         perturbed_answer = data_row['perturbed_gpt4']
-        orig_id = f"{id}~compare_axer_cot~{metric}~orig_perturb"
+        orig_id = f"{id}~compare_axes_rules_cot~{metric}~orig_perturb"
     
     #processing the original answer
     
@@ -88,7 +88,7 @@ def process_instance(data_row, p_mode, metric):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Axes')
+    parser = argparse.ArgumentParser(description='Axes with Rubrics')
     parser.add_argument("--file_name", type=str, 
                         help="File name of the data")
     parser.add_argument("--out_file_name", type=str, 
