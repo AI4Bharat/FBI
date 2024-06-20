@@ -74,7 +74,37 @@ python batch_call.py \
 - `JOB_DESC`: Description of the job for the batch request.
 
 ## Run Evaluation
+To run evaluations, we again create a batch jsonl file `FILENAME.jsonl` and use this for getting model outputs either using Batch API or regular API. We support the following LLM Evaluation strategies (please refer to the paper for more details on each strategy):
+### Single Answer Evaluation
+- single_vanilla
+- single_vanilla_cot
+- single_rubrics
+- single_axes
+- single_axes_rubrics
 
+### Pairwise Comparison
+- compare_vanilla
+- compare_vanilla_cot
+- compare_rules
+- compare_axes
+- compare_axes_rules
+
+### Reference-guided Evaluation
+- reference_based
+
+Use the below command to generate the jsonl file:
+```bash
+python llm_evaluators/<EVAL_METHOD>.py \
+  --data_dir DATA_DIR \
+  --file_name PATH_TO_PROMPTS_AND_ANSWERS \
+  --subset TASK_ABILITY \
+  --model MODEL_NAME \
+  --temperature TEMP \
+  --top_p TOP_P \
+  --max_tokens MAX_TOKENS \
+  --frequency_penalty FREQ_PEN \
+  --debug
+```
 
 
 ## Citation
