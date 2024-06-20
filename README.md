@@ -16,10 +16,15 @@ To run perturbation generation and evaluation, you need to install the required 
 pip install -r requirements.txt
 ```
 
-Setup OpenAI key to make the API calls.
+Setup required API keys to make the API calls.
 ```bash
 export OPENAI_API_KEY=[ADD_YOUR_OPENAI_API_KEY]
+export CLAUDE_API_KEY=[ADD_YOUR_CLAUDE_API_KEY]
+export GEMINI_API_KEY=[ADD_YOUR_GEMINI_API_KEY]
+export LLAMA3_API_KEY=[ADD_LLAMA3_API_KEY]
+export LLAMA3_BASE_URL=[ADD_LLAMA3_BASE_URL]
 ```
+We use hosted services for using Llama-3-70B-Instruct Model.
 
 ## Generate Perturbations
 
