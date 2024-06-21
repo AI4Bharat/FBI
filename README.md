@@ -1,6 +1,6 @@
 # FBI: Finding Blindspots in LLM Evaluations with Interpretable Checklists
 
-[📜 Paper](https://arxiv.org/abs/2406.xxxxx) | [📝 Blogpost](https://ai4bharat.github.io/fbi) | [🤗 HF Dataset](https://huggingface.co/datasets/ai4bharat/fbi)
+[📜 Paper](https://arxiv.org/abs/2406.13439) | [🤗 HF Dataset](https://huggingface.co/datasets/ai4bharat/fbi)
 
 We present FBI, our novel meta-evaluation framework designed to assess the robustness of evaluator LLMs across diverse tasks and evaluation strategies. Please refer to our [paper]() and [blog]() for more details.
 
@@ -140,5 +140,12 @@ python parallel_call.py \
 If you used this repository or our models, please cite our work:
 
 ```bibtex
-
+@misc{doddapaneni2024finding,
+      title={Finding Blind Spots in Evaluator LLMs with Interpretable Checklists}, 
+      author={Doddapaneni Sumanth and Mohammed Safi Ur Rahman Khan and Sshubam Verma and Mitesh M. Khapra},
+      year={2024},
+      eprint={2406.13439},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
 ```
