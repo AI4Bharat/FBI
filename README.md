@@ -140,12 +140,10 @@ python parallel_call.py \
 If you used this repository or our models, please cite our work:
 
 ```bibtex
-@misc{doddapaneni2024finding,
-      title={Finding Blind Spots in Evaluator LLMs with Interpretable Checklists}, 
-      author={Doddapaneni Sumanth and Mohammed Safi Ur Rahman Khan and Sshubam Verma and Mitesh M. Khapra},
-      year={2024},
-      eprint={2406.13439},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
+@article{doddapaneni2024finding,
+  title   = {Finding Blind Spots in Evaluator LLMs with Interpretable Checklists},
+  author  = {Sumanth Doddapaneni and Mohammed Safi Ur Rahman Khan and Sshubam Verma and Mitesh M. Khapra},
+  year    = {2024},
+  journal = {arXiv preprint arXiv: 2406.13439}
 }
 ```
