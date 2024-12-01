@@ -1,4 +1,4 @@
-# FBI: Finding Blindspots in LLM Evaluations with Interpretable Checklists
+# FBI: Finding Blindspots in Evaluator LLMs with Interpretable Checklists
 
 [📜 Paper](https://arxiv.org/abs/2406.13439) | [🤗 HF Dataset](https://huggingface.co/datasets/ai4bharat/fbi)
 
