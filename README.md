@@ -1,5 +1,7 @@
 # FBI: Finding Blindspots in Evaluator LLMs with Interpretable Checklists
 
+🏆 EMNLP 2024 Outstanding Paper Award 🏆
+
 [📜 Paper](https://arxiv.org/abs/2406.13439) | [🤗 HF Dataset](https://huggingface.co/datasets/ai4bharat/fbi)
 
 We present FBI, our novel meta-evaluation framework designed to assess the robustness of evaluator LLMs across diverse tasks and evaluation strategies. Please refer to our [paper]() and [blog]() for more details.
