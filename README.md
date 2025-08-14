@@ -1,5 +1,11 @@
 # FBI: Finding Blindspots in Evaluator LLMs with Interpretable Checklists
 
+<p align="left">
+  <a href="https://aclanthology.org/2024.emnlp-main.911/">
+    <img src="https://img.shields.io/badge/EMNLP%20-2024-blue">
+  </a>
+</p>
+
 🏆 EMNLP 2024 Outstanding Paper Award 🏆
 
 [📜 Paper](https://arxiv.org/abs/2406.13439) | [🤗 HF Dataset](https://huggingface.co/datasets/ai4bharat/fbi)
